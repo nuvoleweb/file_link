@@ -8,6 +8,22 @@
 use Drupal\Core\Link;
 
 /**
+ * Implements hook_help().
+ */
+function file_link_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the featured_content module.
+    case 'help.page.file_link':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('File Link module provides a field that extends the core Link module field by storing metadata about the target file like size and mime-type. The link URI must point to file not to a directory. The site builder can define a list of allowed target file extensions.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
  * Implements hook_theme().
  */
 function file_link_theme() {

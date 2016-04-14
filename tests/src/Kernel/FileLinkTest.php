@@ -30,10 +30,8 @@ class FileLinkTest extends KernelTestBase {
     $this->installConfig(['file_link_test']);
     $this->installEntitySchema('entity_test');
 
-    $entity = EntityTest::create([
-      'name' => 'Foo',
-      'type' => 'article',
-    ]);
+    /** @var \Drupal\entity_test\Entity\EntityTest $entity */
+    $entity = EntityTest::create(['name' => 'Foo', 'type' => 'article']);
 
     $entity->set('doc', ['uri' => static::getFullUrl('')]);
     $violations = $entity->get('doc')->validate();
@@ -51,15 +49,9 @@ class FileLinkTest extends KernelTestBase {
     $violations = $entity->get('doc')->validate();
     $this->assertSame(static::getViolationMessage('/foo.pdf'), (string) $violations->get(0)->getMessage());
 
-    $entity->save();
-
-    //print_r($entity->get('doc'));
     $entity->set('doc', ['uri' => static::getFullUrl('/foo.txt')]);
     $violations = $entity->get('doc')->validate();
     $this->assertSame(0, $violations->count());
-
-    $entity->save();
-    //print_r($entity->get('doc'));
   }
 
   /**
