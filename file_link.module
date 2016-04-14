@@ -1,0 +1,62 @@
+<?php
+
+/**
+ * @file
+ * Contains file_link.module.
+ */
+
+use Drupal\Core\Link;
+
+/**
+ * Implements hook_field_widget_info_alter().
+ */
+function file_link_field_widget_info_alter(array &$info) {
+  // Allow 'file_link' field type to use the 'link_default' widget.
+  $info['link_default']['field_types'][] = 'file_link';
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function file_link_field_formatter_info_alter(array &$info) {
+  // Allow 'file_link' field type to use the 'link' formatter.
+  $info['link']['field_types'][] = 'file_link';
+  $info['link_separate']['field_types'][] = 'file_link';
+}
+
+/**
+ * Implements hook_theme().
+ */
+function file_link_theme() {
+  return [
+    'file_link_formatter_link_separate' => [
+      'variables' => [
+        'title' => NULL,
+        'url_title' => NULL,
+        'url' => NULL,
+        'size' => NULL,
+        'format' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for separated file_link field templates.
+ *
+ * This template outputs a separate title and link.
+ *
+ * Default template: file-link-formatter-link-separate.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - title: (optional) A descriptive or alternate title for the link, which
+ *     may be different than the actual link text.
+ *   - url_title: The anchor text for the link.
+ *   - url: A \Drupal\Core\Url object.
+ *   - size: The target file size formatted according to formatter settings.
+ *   - format: The file mime-type.
+ */
+function template_preprocess_file_link_formatter_link_separate(&$variables) {
+  $variables['link'] = Link::fromTextAndUrl($variables['url_title'], $variables['url']);
+}
