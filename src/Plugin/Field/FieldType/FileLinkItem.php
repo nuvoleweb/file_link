@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\Url;
 use Drupal\file\Plugin\Field\FieldType\FileItem;
+use Drupal\file_link\FileLinkInterface;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
 
 /**
@@ -26,7 +27,14 @@ use Drupal\link\Plugin\Field\FieldType\LinkItem;
  *   constraints = {"LinkAccess" = {}, "LinkToFile" = {}, "LinkExternalProtocols" = {}, "LinkNotExistingInternal" = {}}
  * )
  */
-class FileLinkItem extends LinkItem {
+class FileLinkItem extends LinkItem implements FileLinkInterface {
+
+  /**
+   * Last HTTP response code.
+   *
+   * @var string
+   */
+  protected $lastHttpResponseCode = NULL;
 
   /**
    * The entity type manager service.
@@ -131,7 +139,8 @@ class FileLinkItem extends LinkItem {
       $url = Url::fromUri($this->uri, ['absolute' => TRUE])->toString();
       // Perform only a HEAD method to save bandwidth.
       $response = \Drupal::httpClient()->head($url, $options);
-      if ($response->getStatusCode() == '200') {
+      $this->setLastHttpResponseCode($response->getStatusCode());
+      if ($this->getLastHttpResponseCode() == '200') {
         $this->values['format'] = $response->hasHeader('Content-Type') ? $response->getHeaderLine('Content-Type') : NULL;
         $this->values['size'] = $response->hasHeader('Content-Length') ? (int) $response->getHeaderLine('Content-Length') : 0;
       }
@@ -140,6 +149,20 @@ class FileLinkItem extends LinkItem {
         $this->values['size'] = 0;
       }
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setLastHttpResponseCode($code) {
+    $this->lastHttpResponseCode = $code;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLastHttpResponseCode() {
+    return $this->lastHttpResponseCode;
   }
 
   /**
