@@ -28,6 +28,7 @@ class FileLinkSeparateFormatter extends LinkSeparateFormatter {
     $element = parent::viewElements($items, $langcode);
     foreach ($items as $delta => $item) {
       if (isset($element[$delta])) {
+        $element[$delta]['#theme'] = 'file_link_formatter_link_separate';
         $element[$delta] += [
           '#size' => $this->getSetting('format_size') ? format_size($item->size) : $item->size,
           '#format' => $item->format,

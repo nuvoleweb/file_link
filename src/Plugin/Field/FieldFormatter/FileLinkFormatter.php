@@ -30,12 +30,19 @@ class FileLinkFormatter extends LinkFormatter {
       if (!isset($element[$delta])) {
         continue;
       }
+      $new_element = [
+        '#theme' => 'file_link_formatter',
+        '#link' => $element[$delta],
+      ];
       if (!empty($item->size)) {
         $size = $this->getSetting('format_size') ? format_size($item->size) : $item->size;
-        $element[$delta]['#size'] = $size;
+        $new_element['#size'] = $size;
       }
+      if (!empty($item->format)) {
+        $new_element['#format'] = $item->format;
+      }
+      $element[$delta] = $new_element;
     }
-
     return $element;
   }
 

@@ -7,6 +7,8 @@
  * - link: The link that has already been formatted by Link::fromTextAndUrl().
  * - title: (optional) A descriptive or alternate title for the link, which may
  *   be different than the actual link text.
+ * - size: The target file size formatted according to formatter settings.
+ * - format: The file mime-type.
  *
  * @see template_preprocess()
  * @see template_preprocess_link_formatter_link_separate()
@@ -17,4 +19,7 @@
 {% spaceless %}
   {{ title }}
   {{ link }}
+{% if format and size %}
+  ({{ format }}, {{ size }})
+{% endif %}
 {% endspaceless %}

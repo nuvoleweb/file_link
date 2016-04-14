@@ -28,6 +28,13 @@ function file_link_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $r
  */
 function file_link_theme() {
   return [
+    'file_link_formatter' => [
+      'variables' => [
+        'link' => NULL,
+        'size' => NULL,
+        'format' => NULL,
+      ],
+    ],
     'file_link_formatter_link_separate' => [
       'variables' => [
         'title' => NULL,
