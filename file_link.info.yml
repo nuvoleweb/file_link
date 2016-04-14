@@ -1,5 +1,5 @@
 type: module
-name: Document Link
+name: File Link
 description: 'Extends the core Link module by storing metadata about the target file.'
 core: 8.x
 package: Field types

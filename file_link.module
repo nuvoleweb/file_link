@@ -8,23 +8,6 @@
 use Drupal\Core\Link;
 
 /**
- * Implements hook_field_widget_info_alter().
- */
-function file_link_field_widget_info_alter(array &$info) {
-  // Allow 'file_link' field type to use the 'link_default' widget.
-  $info['link_default']['field_types'][] = 'file_link';
-}
-
-/**
- * Implements hook_field_formatter_info_alter().
- */
-function file_link_field_formatter_info_alter(array &$info) {
-  // Allow 'file_link' field type to use the 'link' formatter.
-  $info['link']['field_types'][] = 'file_link';
-  $info['link_separate']['field_types'][] = 'file_link';
-}
-
-/**
  * Implements hook_theme().
  */
 function file_link_theme() {
