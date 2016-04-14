@@ -14,5 +14,8 @@
     "source": "http://cgit.drupalcode.org/file_link"
   },
   "license": "GPL-2.0+",
-  "require": { }
+  "require": { },
+  "require-dev": {
+    "mikey179/vfsStream": "~1.2"
+  }
 }
