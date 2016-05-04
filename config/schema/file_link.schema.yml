@@ -11,6 +11,9 @@ field.field_settings.file_link:
     file_extensions:
       type: string
       label: 'Allowed file extensions'
+    no_extension:
+      type: boolean
+      label: 'Allow URLs with no extension'
 
 field.value.file_link:
   type: field.value.link

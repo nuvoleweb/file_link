@@ -77,7 +77,7 @@ class FileLinkTest extends KernelTestBase {
    *   The translated violation message.
    */
   protected static function getViolationMessage($path) {
-    return (new TranslatableMarkup("The path '@uri' doesn't point to a file.", ['@uri' => static::getFullUrl($path)]))->__toString();
+    return (new TranslatableMarkup("The path '@uri' doesn't point to a file or the file requires an extension.", ['@uri' => static::getFullUrl($path)]))->__toString();
   }
 
 }

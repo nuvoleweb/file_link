@@ -16,7 +16,7 @@ use Symfony\Component\Validator\ExecutionContextInterface;
  */
 class LinkToFileConstraint extends Constraint implements ConstraintValidatorInterface {
 
-  public $message = "The path '@uri' doesn't point to a file.";
+  public $message = "The path '@uri' doesn't point to a file or the file requires an extension.";
 
   /**
    * @var \Symfony\Component\Validator\ExecutionContextInterface
@@ -57,10 +57,12 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
         $uri = $url->toString();
         $path = parse_url($uri, PHP_URL_PATH);
         $name = \Drupal::service('file_system')->basename($path);
-        if (empty($name) || empty(pathinfo($path, PATHINFO_EXTENSION))) {
+        $needs_extension = !$link->getFieldDefinition()->getSetting('no_extension');
+        $has_extension = !empty(pathinfo($path, PATHINFO_EXTENSION));
+        if (empty($name) || ($needs_extension && !$has_extension)) {
           $is_valid = FALSE;
         }
-        if ($is_valid) {
+        if ($is_valid && $has_extension) {
           $extensions = trim($link->getFieldDefinition()->getSetting('file_extensions'));
           if (!empty($extensions)) {
             $regex = '/\.(' . preg_replace('/ +/', '|', preg_quote($extensions)) . ')$/i';

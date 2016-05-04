@@ -47,7 +47,10 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
    * {@inheritdoc}
    */
   public static function defaultFieldSettings() {
-    return parent::defaultFieldSettings() + ['file_extensions' => 'txt'];
+    return [
+      'file_extensions' => 'txt',
+      'no_extension' => FALSE,
+    ] + parent::defaultFieldSettings();
   }
 
   /**
@@ -89,16 +92,21 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
 
     // Make the extension list a little more human-friendly by comma-separation.
     $extensions = str_replace(' ', ', ', $this->getSetting('file_extensions'));
-    $element['file_extensions'] = array(
+    $element['file_extensions'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Allowed file extensions'),
       '#default_value' => $extensions,
       '#description' => $this->t('Separate extensions with a space or comma and do not include the leading dot. Leave empty to allw any extension.'),
       // Use the 'file' field type validator.
       '#element_validate' => [[FileItem::class, 'validateExtensions']],
-      '#weight' => 1,
       '#maxlength' => 256,
-    );
+    ];
+    $element['no_extension'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Allow URLs without file extension'),
+      '#description' => $this->t('The link can refer a document such as a wiki page or a dynamic generated page that has no extension. Check this if you want to allow such URLs.'),
+      '#default_value' => $this->getSetting('no_extension'),
+    ];
 
     return $element;
   }
@@ -141,8 +149,23 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
       $response = \Drupal::httpClient()->head($url, $options);
       $this->setLastHttpResponseCode($response->getStatusCode());
       if ($this->getLastHttpResponseCode() == '200') {
-        $this->values['format'] = $response->hasHeader('Content-Type') ? $response->getHeaderLine('Content-Type') : NULL;
-        $this->values['size'] = $response->hasHeader('Content-Length') ? (int) $response->getHeaderLine('Content-Length') : 0;
+        if ($response->hasHeader('Content-Type')) {
+          // The format may have the pattern 'text/html; charset=UTF-8'. In this
+          // case, keep only the first relevant part.
+          $this->values['format'] = explode(';', $response->getHeaderLine('Content-Type'))[0];
+        }
+        else {
+          $this->values['format'] = NULL;
+        }
+        if ($response->hasHeader('Content-Length')) {
+          $this->values['size'] = (int) $response->getHeaderLine('Content-Length');
+        }
+        else {
+          // The server didn't sent the Content-Length header. In this case,
+          // perform a full GET and measure the size of returned body.
+          $response = \Drupal::httpClient()->get($url, $options);
+          $this->values['size'] = (int) $response->getBody()->getSize();
+        }
       }
       else {
         $this->values['format'] = NULL;
