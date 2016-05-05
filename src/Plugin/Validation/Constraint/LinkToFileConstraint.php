@@ -42,28 +42,43 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
    */
   public function validate($link, Constraint $constraint) {
     /** @var \Drupal\file_link\Plugin\Field\FieldType\FileLinkItem $link */
-    if (isset($link)) {
-      $is_valid = TRUE;
+    if (!isset($link)) {
+      return;
+    }
 
-      // Try to resolve the given URI to a URL. It may fail if it's schemeless.
-      try {
-        $url = $link->getUrl();
-      }
-      catch (\InvalidArgumentException $e) {
-        $is_valid = FALSE;
+    $is_valid = TRUE;
+
+    // Try to resolve the given URI to a URL. It may fail if it's schemeless.
+    try {
+      $url = $link->getUrl();
+    }
+    catch (\InvalidArgumentException $e) {
+      $is_valid = FALSE;
+    }
+
+    $uri = $url->toString();
+    if ($is_valid) {
+      $needs_extension = !$link->getFieldDefinition()->getSetting('no_extension');
+      $path = trim((string) parse_url($uri, PHP_URL_PATH), '/');
+      if (empty($path)) {
+        if ($needs_extension) {
+          $is_valid = FALSE;
+        }
+        else {
+          // No path and the field accepts URLs without extension. We're done.
+          return;
+        }
       }
 
       if ($is_valid) {
-        $uri = $url->toString();
-        $path = parse_url($uri, PHP_URL_PATH);
         $name = \Drupal::service('file_system')->basename($path);
-        $needs_extension = !$link->getFieldDefinition()->getSetting('no_extension');
         $has_extension = !empty(pathinfo($path, PATHINFO_EXTENSION));
         if (empty($name) || ($needs_extension && !$has_extension)) {
           $is_valid = FALSE;
         }
         if ($is_valid && $has_extension) {
-          $extensions = trim($link->getFieldDefinition()->getSetting('file_extensions'));
+          $extensions = trim($link->getFieldDefinition()
+            ->getSetting('file_extensions'));
           if (!empty($extensions)) {
             $regex = '/\.(' . preg_replace('/ +/', '|', preg_quote($extensions)) . ')$/i';
             if (!preg_match($regex, $name)) {
@@ -71,11 +86,10 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
             }
           }
         }
-
-        if (!$is_valid) {
-          $this->context->addViolation($this->message, ['@uri' => $uri]);
-        }
       }
+    }
+    if (!$is_valid) {
+      $this->context->addViolation($this->message, ['@uri' => $uri]);
     }
   }
 

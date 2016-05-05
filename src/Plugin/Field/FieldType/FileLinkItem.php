@@ -132,8 +132,8 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
     $original = $entity->isNew() ? NULL : $storage->loadUnchanged($entity->id());
     $field_name = $this->getFieldDefinition()->getName();
     $original_uri = $original ? $original->{$field_name}->uri : NULL;
-    $size = $original ? $original->{$field_name}->size: NULL;
-    $format = $original ? $original->{$field_name}->format: NULL;
+    $size = $original ? $original->{$field_name}->size : NULL;
+    $format = $original ? $original->{$field_name}->format : NULL;
 
     // We parse the metadata in any of the next cases:
     // - The host entity is new.
@@ -162,7 +162,7 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
         }
         else {
           // The server didn't sent the Content-Length header. In this case,
-          // perform a full GET and measure the size of returned body.
+          // perform a full GET and measure the size of the returned body.
           $response = \Drupal::httpClient()->get($url, $options);
           $this->values['size'] = (int) $response->getBody()->getSize();
         }
