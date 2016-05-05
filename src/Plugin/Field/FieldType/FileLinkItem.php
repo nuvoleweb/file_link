@@ -96,7 +96,7 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
       '#type' => 'textfield',
       '#title' => $this->t('Allowed file extensions'),
       '#default_value' => $extensions,
-      '#description' => $this->t('Separate extensions with a space or comma and do not include the leading dot. Leave empty to allw any extension.'),
+      '#description' => $this->t('Separate extensions with a space or comma and do not include the leading dot. Leave empty to allow any extension.'),
       // Use the 'file' field type validator.
       '#element_validate' => [[FileItem::class, 'validateExtensions']],
       '#maxlength' => 256,
