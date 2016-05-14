@@ -2,25 +2,62 @@
 
 namespace Drupal\file_link;
 
+use GuzzleHttp\Exception\RequestException;
+use Psr\Http\Message\ResponseInterface;
+
 /**
  * Provides an interface for File Link field.
  */
 interface FileLinkInterface {
 
   /**
-   * Sets the last HTTP response code.
+   * Sets the latest HTTP response.
    *
-   * @param string $code
-   *   The HTTP response code to be stored.
+   * @param \Psr\Http\Message\ResponseInterface $response
+   *   The last response to be stored.
+   *
+   * @return $this
    */
-  public function setLastHttpResponseCode($code);
+  public function setResponse(ResponseInterface $response);
 
   /**
-   * Gets the last HTTP response code.
+   * Gets the latest stored HTTP response.
    *
-   * @return string
-   *   The last HTTP response code.
+   * @return \Psr\Http\Message\ResponseInterface
+   *   A response object.
    */
-  public function getLastHttpResponseCode();
+  public function getResponse();
+
+  /**
+   * Clears a previous stored HTTP response.
+   *
+   * @return $this
+   */
+  public function clearResponse();
+
+  /**
+   * Sets the exception throw by the last HTTP client request.
+   *
+   * @param \GuzzleHttp\Exception\RequestException $exception
+   *   The last Guzzle request exception.
+   *
+   * @return $this
+   */
+  public function setException(RequestException $exception);
+
+  /**
+   * Gets the last Guzzle client exception.
+   *
+   * @return \GuzzleHttp\Exception\RequestException
+   *   The last Guzzle client exception.
+   */
+  public function getException();
+
+  /**
+   * Clears a previous stored Guzzle exception.
+   *
+   * @return $this
+   */
+  public function clearException();
 
 }

@@ -10,6 +10,8 @@ use Drupal\Core\Url;
 use Drupal\file\Plugin\Field\FieldType\FileItem;
 use Drupal\file_link\FileLinkInterface;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
+use GuzzleHttp\Exception\RequestException;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Implements a 'file_link' plugin field type.
@@ -30,11 +32,18 @@ use Drupal\link\Plugin\Field\FieldType\LinkItem;
 class FileLinkItem extends LinkItem implements FileLinkInterface {
 
   /**
-   * Last HTTP response code.
+   * The HTTP response of the last client request, if any.
    *
-   * @var string
+   * @var \Psr\Http\Message\ResponseInterface
    */
-  protected $lastHttpResponseCode = NULL;
+  protected $response = NULL;
+
+  /**
+   * The exception throw by the the last HTTP client request, if any.
+   *
+   * @var \GuzzleHttp\Exception\RequestException
+   */
+  protected $exception = NULL;
 
   /**
    * The entity type manager service.
@@ -42,6 +51,13 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
+
+  /**
+   * The HTTP client service.
+   *
+   * @var \GuzzleHttp\Client
+   */
+  protected $httpClient;
 
   /**
    * {@inheritdoc}
@@ -145,10 +161,20 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
       // Don't throw exceptions on HTTP level errors (e.g. 404, 403, etc).
       $options = ['exceptions' => FALSE];
       $url = Url::fromUri($this->uri, ['absolute' => TRUE])->toString();
-      // Perform only a HEAD method to save bandwidth.
-      $response = \Drupal::httpClient()->head($url, $options);
-      $this->setLastHttpResponseCode($response->getStatusCode());
-      if ($this->getLastHttpResponseCode() == '200') {
+
+      // Clear any previous stored results (response and/or exception).
+      $this->clearResponse();
+      $this->clearException();
+
+      try {
+        // Perform only a HEAD method to save bandwidth.
+        $this->setResponse($this->getHttpClient()->head($url, $options));
+      }
+      catch (RequestException $request_exception) {
+        $this->setException($request_exception);
+      }
+
+      if (!$this->getException() && ($response = $this->getResponse()) && ($response->getStatusCode() == '200')) {
         if ($response->hasHeader('Content-Type')) {
           // The format may have the pattern 'text/html; charset=UTF-8'. In this
           // case, keep only the first relevant part.
@@ -163,8 +189,9 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
         else {
           // The server didn't sent the Content-Length header. In this case,
           // perform a full GET and measure the size of the returned body.
-          $response = \Drupal::httpClient()->get($url, $options);
+          $response = $this->getHttpClient()->get($url, $options);
           $this->values['size'] = (int) $response->getBody()->getSize();
+          $this->setResponse($response);
         }
       }
       else {
@@ -177,15 +204,47 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
   /**
    * {@inheritdoc}
    */
-  public function setLastHttpResponseCode($code) {
-    $this->lastHttpResponseCode = $code;
+  public function setResponse(ResponseInterface $response) {
+    $this->response = $response;
+    return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getLastHttpResponseCode() {
-    return $this->lastHttpResponseCode;
+  public function getResponse() {
+    return $this->response;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function clearResponse() {
+    $this->response = NULL;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setException(RequestException $exception) {
+    $this->exception = $exception;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getException() {
+    return $this->exception;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function clearException() {
+    $this->exception = NULL;
+    return $this;
   }
 
   /**
@@ -199,6 +258,20 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
       $this->entityTypeManager = \Drupal::entityTypeManager();
     }
     return $this->entityTypeManager;
+  }
+
+
+  /**
+   * Returns the HTTP client service.
+   *
+   * @return \GuzzleHttp\Client
+   *   The Guzzle client.
+   */
+  protected function getHttpClient() {
+    if (!isset($this->httpClient)) {
+      $this->httpClient = \Drupal::httpClient();
+    }
+    return $this->httpClient;
   }
 
 }
