@@ -1,7 +1,7 @@
 # Schema for the configuration files of the File Link module.
 
 field.storage_settings.file_link:
-  type: field.storage_settings.link:
+  type: field.storage_settings.link
   label: 'File Link settings'
 
 field.field_settings.file_link:
