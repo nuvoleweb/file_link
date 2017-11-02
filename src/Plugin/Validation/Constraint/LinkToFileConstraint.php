@@ -4,7 +4,7 @@ namespace Drupal\file_link\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
-use Symfony\Component\Validator\ExecutionContextInterface;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Validation constraint for file_link, checking that URI points to a file.
@@ -19,7 +19,7 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
   public $message = "The path '@uri' doesn't point to a file or the file requires an extension.";
 
   /**
-   * @var \Symfony\Component\Validator\ExecutionContextInterface
+   * @var \Symfony\Component\Validator\Context\ExecutionContextInterface
    */
   protected $context;
 
