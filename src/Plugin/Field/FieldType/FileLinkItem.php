@@ -26,7 +26,12 @@ use Psr\Http\Message\ResponseInterface;
  *   description = @Translation("Stores a URL string pointing to a file, optional varchar link text, and file metadata, like size and mime-type."),
  *   default_widget = "file_link_default",
  *   default_formatter = "link",
- *   constraints = {"LinkAccess" = {}, "LinkToFile" = {}, "LinkExternalProtocols" = {}, "LinkNotExistingInternal" = {}}
+ *   constraints = {
+ *      "LinkAccess" = {},
+ *      "LinkToFile" = {},
+ *      "LinkExternalProtocols" = {},
+ *      "LinkNotExistingInternal" = {}
+ *   }
  * )
  */
 class FileLinkItem extends LinkItem implements FileLinkInterface {
@@ -259,7 +264,6 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
     }
     return $this->entityTypeManager;
   }
-
 
   /**
    * Returns the HTTP client service.

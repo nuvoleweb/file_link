@@ -36,7 +36,6 @@ before_script:
 script:
 - docker-compose exec -u root php ./vendor/bin/grumphp run
 - docker-compose exec -u root php ./vendor/bin/phpunit
-- docker-compose exec -u root php ./vendor/bin/behat
 
 notifications:
   email: false

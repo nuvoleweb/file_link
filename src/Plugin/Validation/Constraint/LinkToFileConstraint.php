@@ -19,6 +19,8 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
   public $message = "The path '@uri' doesn't point to a file or the file requires an extension.";
 
   /**
+   * Validation execution context.
+   *
    * @var \Symfony\Component\Validator\Context\ExecutionContextInterface
    */
   protected $context;
