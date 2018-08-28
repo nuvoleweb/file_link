@@ -164,7 +164,10 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
     $needs_parsing = $entity->isNew() || ($this->uri !== $original_uri) || empty($size) || empty($format);
     if ($needs_parsing) {
       // Don't throw exceptions on HTTP level errors (e.g. 404, 403, etc).
-      $options = ['exceptions' => FALSE];
+      $options = [
+        'exceptions' => FALSE,
+        'allow_redirects' => TRUE,
+      ];
       $url = Url::fromUri($this->uri, ['absolute' => TRUE])->toString();
 
       // Clear any previous stored results (response and/or exception).
@@ -179,7 +182,7 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
         $this->setException($request_exception);
       }
 
-      if (!$this->getException() && ($response = $this->getResponse()) && ($response->getStatusCode() == '200')) {
+      if (!$this->getException() && ($response = $this->getResponse()) && ($this->isSupportedResponse($response))) {
         if ($response->hasHeader('Content-Type')) {
           // The format may have the pattern 'text/html; charset=UTF-8'. In this
           // case, keep only the first relevant part.
@@ -276,6 +279,24 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
       $this->httpClient = \Drupal::httpClient();
     }
     return $this->httpClient;
+  }
+
+  /**
+   * Check whereas given response is supported by field type.
+   *
+   * @param \Psr\Http\Message\ResponseInterface $response
+   *    Response object.
+   *
+   * @return bool
+   *    TRUE if supported, FALSE otherwise.
+   */
+  protected function isSupportedResponse(ResponseInterface $response) {
+    return in_array($response->getStatusCode(), [
+      '200',
+      '301',
+      '302',
+      '304',
+    ]);
   }
 
 }

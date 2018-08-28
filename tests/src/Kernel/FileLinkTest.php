@@ -80,6 +80,16 @@ class FileLinkTest extends KernelTestBase {
   }
 
   /**
+   * Tests redirects.
+   */
+  public function testRedirects() {
+    $this->entity->set('url_without_extension', ['uri' => Url::fromUri('base:/test/redirect/302', ['absolute' => TRUE])->toString()]);
+    $violations = $this->entity->get('url_without_extension')->validate();
+    $this->assertSame(0, $violations->count());
+    $this->entity->save();
+  }
+
+  /**
    * Provides a full URL given a path relative to file_link_test module.
    *
    * @param string $path
