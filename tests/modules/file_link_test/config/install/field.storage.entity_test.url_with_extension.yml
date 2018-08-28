@@ -4,8 +4,8 @@ dependencies:
   module:
     - file_link
     - entity_test
-id: entity_test.doc
-field_name: doc
+id: entity_test.url_with_extension
+field_name: url_with_extension
 entity_type: entity_test
 type: file_link
 settings: {  }

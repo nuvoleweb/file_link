@@ -44,7 +44,7 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
    */
   public function validate($link, Constraint $constraint) {
     /** @var \Drupal\file_link\Plugin\Field\FieldType\FileLinkItem $link */
-    if (!isset($link)) {
+    if ($link->isEmpty()) {
       return;
     }
 
@@ -58,8 +58,8 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
       $is_valid = FALSE;
     }
 
-    $uri = $url->toString();
     if ($is_valid) {
+      $uri = $url->toString();
       $needs_extension = !$link->getFieldDefinition()->getSetting('no_extension');
       $path = trim((string) parse_url($uri, PHP_URL_PATH), '/');
       if (empty($path)) {
@@ -91,7 +91,7 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
       }
     }
     if (!$is_valid) {
-      $this->context->addViolation($this->message, ['@uri' => $uri]);
+      $this->context->addViolation($this->message, ['@uri' => $link->get('uri')->getValue()]);
     }
   }
 

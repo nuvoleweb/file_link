@@ -2,13 +2,13 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.entity_test.doc
-id: entity_test.article.doc
-field_name: doc
+    - field.storage.entity_test.url_with_extension
+id: entity_test.article.url_with_extension
+field_name: url_with_extension
 entity_type: entity_test
 bundle: article
-label: Document
-description: 'Links to a document file'
+label: 'URL with extension'
+description: ''
 required: false
 translatable: false
 default_value: {  }
@@ -17,4 +17,5 @@ settings:
   link_type: 17
   title: 1
   file_extensions: 'txt'
+  no_extension: false
 field_type: file_link

@@ -38,30 +38,30 @@ class FileLinkTest extends KernelTestBase {
   }
 
   /**
-   * Tests file_link field metadata storage.
+   * Tests file_link field metadata storage with extension.
    */
-  public function testMetadata() {
+  public function testWithExtension() {
     /** @var \Drupal\entity_test\Entity\EntityTest $entity */
     $entity = EntityTest::create(['name' => 'Foo', 'type' => 'article']);
 
-    $entity->set('doc', ['uri' => static::getFullUrl('')]);
-    $violations = $entity->get('doc')->validate();
+    $entity->set('url_with_extension', ['uri' => static::getFullUrl('')]);
+    $violations = $entity->get('url_with_extension')->validate();
     $this->assertSame(static::getViolationMessage(''), (string) $violations->get(0)->getMessage());
 
-    $entity->set('doc', ['uri' => static::getFullUrl('/')]);
-    $violations = $entity->get('doc')->validate();
+    $entity->set('url_with_extension', ['uri' => static::getFullUrl('/')]);
+    $violations = $entity->get('url_with_extension')->validate();
     $this->assertSame(static::getViolationMessage('/'), (string) $violations->get(0)->getMessage());
 
-    $entity->set('doc', ['uri' => static::getFullUrl('/foo')]);
-    $violations = $entity->get('doc')->validate();
+    $entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo')]);
+    $violations = $entity->get('url_with_extension')->validate();
     $this->assertSame(static::getViolationMessage('/foo'), (string) $violations->get(0)->getMessage());
 
-    $entity->set('doc', ['uri' => static::getFullUrl('/foo.pdf')]);
-    $violations = $entity->get('doc')->validate();
+    $entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo.pdf')]);
+    $violations = $entity->get('url_with_extension')->validate();
     $this->assertSame(static::getViolationMessage('/foo.pdf'), (string) $violations->get(0)->getMessage());
 
-    $entity->set('doc', ['uri' => static::getFullUrl('/foo.txt')]);
-    $violations = $entity->get('doc')->validate();
+    $entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo.txt')]);
+    $violations = $entity->get('url_with_extension')->validate();
     $this->assertSame(0, $violations->count());
   }
 
