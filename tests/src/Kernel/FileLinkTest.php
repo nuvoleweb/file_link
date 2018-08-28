@@ -15,21 +15,32 @@ use Drupal\KernelTests\KernelTestBase;
 class FileLinkTest extends KernelTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected static $modules = [
+    'file_link',
+    'file_link_test',
+    'entity_test',
+    'link',
+    'field',
+    'user',
+    'system',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->installConfig(['file_link_test']);
+    $this->installEntitySchema('entity_test');
+  }
+
+  /**
    * Tests file_link field metadata storage.
    */
   public function testMetadata() {
-    $this->enableModules([
-      'file_link',
-      'file_link_test',
-      'entity_test',
-      'link',
-      'field',
-      'user',
-      'system',
-    ]);
-    $this->installConfig(['file_link_test']);
-    $this->installEntitySchema('entity_test');
-
     /** @var \Drupal\entity_test\Entity\EntityTest $entity */
     $entity = EntityTest::create(['name' => 'Foo', 'type' => 'article']);
 
