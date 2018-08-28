@@ -28,6 +28,13 @@ class FileLinkTest extends KernelTestBase {
   ];
 
   /**
+   * Test entity.
+   *
+   * @var \Drupal\entity_test\Entity\EntityTest
+   */
+  protected $entity;
+  
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -35,33 +42,40 @@ class FileLinkTest extends KernelTestBase {
 
     $this->installConfig(['file_link_test']);
     $this->installEntitySchema('entity_test');
+    $this->entity = EntityTest::create(['name' => 'Foo', 'type' => 'article']);
   }
 
   /**
    * Tests file_link field metadata storage with extension.
    */
   public function testWithExtension() {
-    /** @var \Drupal\entity_test\Entity\EntityTest $entity */
-    $entity = EntityTest::create(['name' => 'Foo', 'type' => 'article']);
-
-    $entity->set('url_with_extension', ['uri' => static::getFullUrl('')]);
-    $violations = $entity->get('url_with_extension')->validate();
+    $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('')]);
+    $violations = $this->entity->get('url_with_extension')->validate();
     $this->assertSame(static::getViolationMessage(''), (string) $violations->get(0)->getMessage());
 
-    $entity->set('url_with_extension', ['uri' => static::getFullUrl('/')]);
-    $violations = $entity->get('url_with_extension')->validate();
+    $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('/')]);
+    $violations = $this->entity->get('url_with_extension')->validate();
     $this->assertSame(static::getViolationMessage('/'), (string) $violations->get(0)->getMessage());
 
-    $entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo')]);
-    $violations = $entity->get('url_with_extension')->validate();
+    $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo')]);
+    $violations = $this->entity->get('url_with_extension')->validate();
     $this->assertSame(static::getViolationMessage('/foo'), (string) $violations->get(0)->getMessage());
 
-    $entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo.pdf')]);
-    $violations = $entity->get('url_with_extension')->validate();
+    $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo.pdf')]);
+    $violations = $this->entity->get('url_with_extension')->validate();
     $this->assertSame(static::getViolationMessage('/foo.pdf'), (string) $violations->get(0)->getMessage());
 
-    $entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo.txt')]);
-    $violations = $entity->get('url_with_extension')->validate();
+    $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo.txt')]);
+    $violations = $this->entity->get('url_with_extension')->validate();
+    $this->assertSame(0, $violations->count());
+  }
+
+  /**
+   * Tests file_link field metadata storage without extension.
+   */
+  public function testWithoutExtension() {
+    $this->entity->set('url_without_extension', ['uri' => static::getFullUrl('')]);
+    $violations = $this->entity->get('url_without_extension')->validate();
     $this->assertSame(0, $violations->count());
   }
 
