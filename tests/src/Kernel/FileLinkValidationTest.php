@@ -12,7 +12,7 @@ use Drupal\KernelTests\KernelTestBase;
  *
  * @group file_link
  */
-class FileLinkTest extends KernelTestBase {
+class FileLinkValidationTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -77,16 +77,6 @@ class FileLinkTest extends KernelTestBase {
     $this->entity->set('url_without_extension', ['uri' => static::getFullUrl('')]);
     $violations = $this->entity->get('url_without_extension')->validate();
     $this->assertSame(0, $violations->count());
-  }
-
-  /**
-   * Tests redirects.
-   */
-  public function testRedirects() {
-    $this->entity->set('url_without_extension', ['uri' => Url::fromUri('base:/test/redirect/302', ['absolute' => TRUE])->toString()]);
-    $violations = $this->entity->get('url_without_extension')->validate();
-    $this->assertSame(0, $violations->count());
-    $this->entity->save();
   }
 
   /**

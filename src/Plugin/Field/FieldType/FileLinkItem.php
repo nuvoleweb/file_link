@@ -285,10 +285,10 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
    * Check whereas given response is supported by field type.
    *
    * @param \Psr\Http\Message\ResponseInterface $response
-   *    Response object.
+   *   Response object.
    *
    * @return bool
-   *    TRUE if supported, FALSE otherwise.
+   *   TRUE if supported, FALSE otherwise.
    */
   protected function isSupportedResponse(ResponseInterface $response) {
     return in_array($response->getStatusCode(), [

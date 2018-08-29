@@ -31,11 +31,12 @@ install:
 - docker-compose exec -u root php composer require webflo/drupal-core-require-dev:$DRUPAL_VERSION --dev
 
 before_script:
-- docker-compose exec -u root php ./vendor/bin/run drupal:site-install
+- docker-compose exec -u root php ./vendor/bin/run drupal:site-setup
+- sudo chmod -R a+w build
 
 script:
-- docker-compose exec -u root php ./vendor/bin/grumphp run
-- docker-compose exec -u root php ./vendor/bin/phpunit
+- docker-compose exec php ./vendor/bin/grumphp run
+- docker-compose exec -u www-data php ./vendor/bin/phpunit
 
 notifications:
   email: false
