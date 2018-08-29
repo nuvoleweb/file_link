@@ -2,7 +2,8 @@ sudo: required
 language: php
 
 php:
-- 5.6
+# @todo: fix recursion issue on PHP 5.6 on Travis only.
+#- 5.6
 - 7.1
 
 git:
