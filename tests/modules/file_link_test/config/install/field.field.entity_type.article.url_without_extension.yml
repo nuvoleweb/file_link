@@ -16,6 +16,6 @@ default_value_callback: ''
 settings:
   link_type: 17
   title: 1
-  file_extensions: 'txt'
+  file_extensions: 'txt md'
   no_extension: true
 field_type: file_link

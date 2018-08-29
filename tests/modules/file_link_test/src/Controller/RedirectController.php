@@ -15,7 +15,7 @@ class RedirectController extends ControllerBase {
    * Builds the response.
    */
   public function redirectToFile($status) {
-    return new RedirectResponse(self::getFullUrl('/foo.txt'), $status);
+    return new RedirectResponse(self::getFullUrl('/foo.md'), $status);
   }
 
   /**

@@ -15,8 +15,6 @@ use Drupal\Tests\BrowserTestBase;
  */
 class FileLinkRedirectTest extends BrowserTestBase {
 
-  protected $htmlOutputEnabled = FALSE;
-
   /**
    * {@inheritdoc}
    */
@@ -32,10 +30,42 @@ class FileLinkRedirectTest extends BrowserTestBase {
 
   /**
    * Tests redirects.
+   *
+   * @param string $path
+   *    Path to request.
+   * @param int $size
+   *    Expected file size.
+   * @param $format
+   *    Expected file format.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
+   *
+   * @dataProvider redirectDataProvider
    */
-  public function testRedirects() {
+  public function testRedirects($path, $size, $format) {
     $entity = EntityTest::create(['name' => 'Foo', 'type' => 'article']);
-    $entity->set('url_without_extension', ['uri' => Url::fromUri('base:/test/redirect/302', ['absolute' => TRUE])->toString()]);
+    $entity->set('url_without_extension', [
+      'uri' => Url::fromUri('base:' . $path, ['absolute' => TRUE])->toString(),
+    ]);
     $entity->save();
+
+    /** @var \Drupal\file_link\Plugin\Field\FieldType\FileLinkItem $file_link */
+    $file_link = $entity->get('url_without_extension')->first();
+    $this->assertEquals($size, $file_link->get('size')->getValue());
+    $this->assertEquals($format, $file_link->get('format')->getValue());
+  }
+
+  /**
+   * Data provider.
+   *
+   * @return array
+   *    Redirect test data and expectations.
+   */
+  public function redirectDataProvider() {
+    return [
+      ['/test/redirect/301', 3, 'application/octet-stream'],
+      ['/test/redirect/302', 3, 'application/octet-stream'],
+    ];
   }
 }

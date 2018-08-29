@@ -65,7 +65,7 @@ class FileLinkValidationTest extends KernelTestBase {
     $violations = $this->entity->get('url_with_extension')->validate();
     $this->assertSame(static::getViolationMessage('/foo.pdf'), (string) $violations->get(0)->getMessage());
 
-    $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo.txt')]);
+    $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo.md')]);
     $violations = $this->entity->get('url_with_extension')->validate();
     $this->assertSame(0, $violations->count());
   }
