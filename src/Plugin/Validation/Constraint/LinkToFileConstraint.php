@@ -2,11 +2,14 @@
 
 namespace Drupal\file_link\Plugin\Validation\Constraint;
 
+use Drupal\Core\Site\Settings;
 use Drupal\file_link\Plugin\Field\FieldType\FileLinkItem;
-use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Uri;
 
 /**
  * Validation constraint for file_link, checking that URI points to a file.
@@ -61,17 +64,26 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
     }
 
     if ($is_valid) {
-      if (!$this->hasPath($url)) {
-        if ($this->needsExtension($link)) {
-          $is_valid = FALSE;
-        }
-        else {
-          // No path and the field accepts URLs without extension. We're done.
-          return;
-        }
+      // If URL has no path but it still needs an extension then it's not valid.
+      if (!$this->hasPath($url) && $this->needsExtension($link)) {
+        $is_valid = FALSE;
       }
 
       if ($is_valid) {
+
+        // Check for redirect response and get effective URL in case.
+        if (!$this->hasExtension($url) && Settings::get('file_link.follow_redirect_on_validate', TRUE)) {
+          $options = [
+            'exceptions' => FALSE,
+            'allow_redirects' => [
+              'on_redirect' => function (Request $request, Response $response, Uri $uri) use (&$url) {
+                $url = (string) $uri;
+              },
+            ],
+          ];
+          \Drupal::httpClient()->head($url, $options);
+        }
+
         $name = \Drupal::service('file_system')->basename($this->getPath($url));
         if (empty($name) || ($this->needsExtension($link) && !$this->hasExtension($url))) {
           $is_valid = FALSE;
@@ -158,24 +170,6 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
       return (bool) preg_match($regex, $basename) !== FALSE;
     }
     return TRUE;
-  }
-
-  /**
-   * Check whereas given response is supported by field type.
-   *
-   * @param \Psr\Http\Message\ResponseInterface $response
-   *   Response object.
-   *
-   * @return bool
-   *   TRUE if supported, FALSE otherwise.
-   */
-  protected function isSupportedResponse(ResponseInterface $response) {
-    return in_array($response->getStatusCode(), [
-      '200',
-      '301',
-      '302',
-      '304',
-    ]);
   }
 
 }

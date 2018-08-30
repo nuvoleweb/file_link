@@ -309,7 +309,6 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
       '200',
       '301',
       '302',
-      '304',
     ]);
   }
 

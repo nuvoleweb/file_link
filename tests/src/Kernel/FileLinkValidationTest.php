@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\file_link\Kernel;
 
+use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTest;
@@ -43,6 +44,11 @@ class FileLinkValidationTest extends KernelTestBase {
     $this->installConfig(['file_link_test']);
     $this->installEntitySchema('entity_test');
     $this->entity = EntityTest::create(['name' => 'Foo', 'type' => 'article']);
+
+    // Disable redirect on validation.
+    $settings = Settings::getAll();
+    $settings['file_link.follow_redirect_on_validate'] = FALSE;
+    new Settings($settings);
   }
 
   /**

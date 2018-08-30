@@ -57,6 +57,21 @@ class FileLinkRedirectTest extends BrowserTestBase {
   }
 
   /**
+   * Test not valid redirect.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testNotValidRedirect() {
+    $entity = EntityTest::create(['name' => 'Foo', 'type' => 'article']);
+    $entity->set('url_without_extension', [
+      'uri' => Url::fromUri('base:/test/redirect/301/rst', ['absolute' => TRUE])->toString(),
+    ]);
+
+    $violations = $entity->get('url_without_extension')->validate();
+    $this->assertSame(1, $violations->count());
+  }
+
+  /**
    * Data provider.
    *
    * @return array
@@ -64,9 +79,8 @@ class FileLinkRedirectTest extends BrowserTestBase {
    */
   public function redirectDataProvider() {
     return [
-      ['/test/redirect/301', 3, 'application/octet-stream'],
-      ['/test/redirect/302', 3, 'application/octet-stream'],
-      ['/test/redirect/304', 3, 'application/octet-stream'],
+      ['/test/redirect/301/md', 3, 'application/octet-stream'],
+      ['/test/redirect/302/md', 3, 'application/octet-stream'],
     ];
   }
 }
