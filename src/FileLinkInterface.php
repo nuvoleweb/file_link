@@ -11,6 +11,22 @@ use Psr\Http\Message\ResponseInterface;
 interface FileLinkInterface {
 
   /**
+   * Get raw file size.
+   *
+   * @return int
+   *   File size in bytes.
+   */
+  public function getSize();
+
+  /**
+   * Get file format.
+   *
+   * @return string
+   *   File format.
+   */
+  public function getFormat();
+
+  /**
    * Sets the latest HTTP response.
    *
    * @param \Psr\Http\Message\ResponseInterface $response

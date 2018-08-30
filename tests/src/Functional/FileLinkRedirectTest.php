@@ -52,8 +52,8 @@ class FileLinkRedirectTest extends BrowserTestBase {
 
     /** @var \Drupal\file_link\Plugin\Field\FieldType\FileLinkItem $file_link */
     $file_link = $entity->get('url_without_extension')->first();
-    $this->assertEquals($size, $file_link->get('size')->getValue());
-    $this->assertEquals($format, $file_link->get('format')->getValue());
+    $this->assertEquals($size, $file_link->getSize());
+    $this->assertEquals($format, $file_link->getFormat());
   }
 
   /**
@@ -66,6 +66,7 @@ class FileLinkRedirectTest extends BrowserTestBase {
     return [
       ['/test/redirect/301', 3, 'application/octet-stream'],
       ['/test/redirect/302', 3, 'application/octet-stream'],
+      ['/test/redirect/304', 3, 'application/octet-stream'],
     ];
   }
 }

@@ -212,6 +212,20 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
   /**
    * {@inheritdoc}
    */
+  public function getSize() {
+    return $this->get('size')->getValue();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormat() {
+    return $this->get('format')->getValue();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setResponse(ResponseInterface $response) {
     $this->response = $response;
     return $this;
