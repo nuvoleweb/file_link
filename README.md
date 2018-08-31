@@ -50,7 +50,15 @@ Run tests:
 $ docker-compose exec web ./vendor/bin/phpunit
 ```
 
+You can disable HTTP redirect following on field validation by setting the following in you `settings.php`:
+
+```
+$settings['file_link.follow_redirect_on_validate'] = FALSE;
+```
+
+This could be useful to speed up bulk import content operations.
+
 # Author
 
-Claudiu Cristea - https://www.drupal.org/u/claudiu.cristea
-Nuvole - http://nuvole.org
+- Claudiu Cristea - https://www.drupal.org/u/claudiu.cristea
+- Nuvole - http://nuvole.org

@@ -57,19 +57,19 @@ class FileLinkValidationTest extends KernelTestBase {
   public function testWithExtension() {
     $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('')]);
     $violations = $this->entity->get('url_with_extension')->validate();
-    $this->assertSame(static::getViolationMessage(''), (string) $violations->get(0)->getMessage());
+    $this->assertSame(static::getViolationMessage('Provided file URL has no extension: @uri', ''), (string) $violations->get(0)->getMessage());
 
     $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('/')]);
     $violations = $this->entity->get('url_with_extension')->validate();
-    $this->assertSame(static::getViolationMessage('/'), (string) $violations->get(0)->getMessage());
+    $this->assertSame(static::getViolationMessage('Provided file URL has no extension: @uri', '/'), (string) $violations->get(0)->getMessage());
 
     $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo')]);
     $violations = $this->entity->get('url_with_extension')->validate();
-    $this->assertSame(static::getViolationMessage('/foo'), (string) $violations->get(0)->getMessage());
+    $this->assertSame(static::getViolationMessage('Provided file URL has no extension: @uri', '/foo'), (string) $violations->get(0)->getMessage());
 
     $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo.pdf')]);
     $violations = $this->entity->get('url_with_extension')->validate();
-    $this->assertSame(static::getViolationMessage('/foo.pdf'), (string) $violations->get(0)->getMessage());
+    $this->assertSame(static::getViolationMessage('Provided file URL has no valid extension: @uri', '/foo.pdf'), (string) $violations->get(0)->getMessage());
 
     $this->entity->set('url_with_extension', ['uri' => static::getFullUrl('/foo.md')]);
     $violations = $this->entity->get('url_with_extension')->validate();
@@ -101,14 +101,16 @@ class FileLinkValidationTest extends KernelTestBase {
   /**
    * Provides the violation message for the URl returned by ::getFullUrl().
    *
+   * @param $message
+   *   Error message.
    * @param string $path
    *   A path relative to file_link_test module.
    *
    * @return string
    *   The translated violation message.
    */
-  protected static function getViolationMessage($path) {
-    return (new TranslatableMarkup("The path '@uri' doesn't point to a file or the file requires an extension.", ['@uri' => static::getFullUrl($path)]))->__toString();
+  protected static function getViolationMessage($message, $path) {
+    return (new TranslatableMarkup($message, ['@uri' => static::getFullUrl($path)]))->__toString();
   }
 
 }

@@ -21,8 +21,6 @@ use GuzzleHttp\Psr7\Uri;
  */
 class LinkToFileConstraint extends Constraint implements ConstraintValidatorInterface {
 
-  public $message = "The path '@uri' doesn't point to a file or the file requires an extension.";
-
   /**
    * Validation execution context.
    *
@@ -60,32 +58,24 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
       $url = $link->getUrl()->toString();
     }
     catch (\InvalidArgumentException $e) {
+      $this->context->addViolation("The following error occurred while getting the link URL: @error", ['@error' => $e->getMessage()]);
       $is_valid = FALSE;
     }
 
     if ($is_valid) {
       // If URL has no path but it still needs an extension then it's not valid.
       if (!$this->hasPath($url) && $this->needsExtension($link)) {
+        $this->context->addViolation("Provided file URL has no path nor extension: @uri", ['@uri' => $link->get('uri')->getValue()]);
         $is_valid = FALSE;
       }
 
       if ($is_valid) {
-
-        // Check for redirect response and get effective URL in case.
-        if (!$this->hasExtension($url) && Settings::get('file_link.follow_redirect_on_validate', TRUE)) {
-          $options = [
-            'exceptions' => FALSE,
-            'allow_redirects' => [
-              'on_redirect' => function (Request $request, Response $response, Uri $uri) use (&$url) {
-                $url = (string) $uri;
-              },
-            ],
-          ];
-          \Drupal::httpClient()->head($url, $options);
-        }
+        // Check for redirect response and get effective URL if any.
+        $url = $this->getEffectiveUrl($url);
 
         $name = \Drupal::service('file_system')->basename($this->getPath($url));
         if (empty($name) || ($this->needsExtension($link) && !$this->hasExtension($url))) {
+          $this->context->addViolation("Provided file URL has no extension: @uri", ['@uri' => $link->get('uri')->getValue()]);
           $is_valid = FALSE;
         }
         if ($is_valid && $this->hasExtension($url)) {
@@ -96,7 +86,7 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
 
     // If not valid construct error message.
     if (!$is_valid) {
-      $this->context->addViolation($this->message, ['@uri' => $link->get('uri')->getValue()]);
+      $this->context->addViolation("Provided file URL has no valid extension: @uri", ['@uri' => $link->get('uri')->getValue()]);
     }
   }
 
@@ -170,6 +160,34 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
       return (bool) preg_match($regex, $basename) !== FALSE;
     }
     return TRUE;
+  }
+
+  /**
+   * Get effective URL by following redirects, if any.
+   *
+   * @param string $url
+   *   Original URL.
+   *
+   * @return string
+   *   Effective URL.
+   */
+  protected function getEffectiveUrl($url) {
+    if (!Settings::get('file_link.follow_redirect_on_validate', TRUE)) {
+      return $url;
+    }
+
+    // Setup HTTP client to follow redirect and perform an HEAD request.
+    $options = [
+      'exceptions' => FALSE,
+      'allow_redirects' => [
+        'on_redirect' => function (Request $request, Response $response, Uri $uri) use (&$url) {
+          $url = (string) $uri;
+        },
+      ],
+    ];
+    \Drupal::httpClient()->head($url, $options);
+
+    return $url;
   }
 
 }
