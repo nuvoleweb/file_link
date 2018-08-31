@@ -182,6 +182,9 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
         $this->setException($request_exception);
       }
 
+      $this->values['format'] = NULL;
+      $this->values['size'] = 0;
+
       if (!$this->getException() && ($response = $this->getResponse()) && ($this->isSupportedResponse($response))) {
         if ($response->hasHeader('Content-Type')) {
           // The format may have the pattern 'text/html; charset=UTF-8'. In this
@@ -201,10 +204,6 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
           $this->values['size'] = (int) $response->getBody()->getSize();
           $this->setResponse($response);
         }
-      }
-      else {
-        $this->values['format'] = NULL;
-        $this->values['size'] = 0;
       }
     }
   }
