@@ -166,7 +166,9 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
       // Don't throw exceptions on HTTP level errors (e.g. 404, 403, etc).
       $options = [
         'exceptions' => FALSE,
-        'allow_redirects' => TRUE,
+        'allow_redirects' => [
+          'strict' => TRUE,
+        ],
       ];
       $url = Url::fromUri($this->uri, ['absolute' => TRUE])->toString();
 
@@ -195,7 +197,7 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
           $this->values['format'] = NULL;
         }
         if ($response->hasHeader('Content-Length')) {
-          $this->values['size'] = (int) $response->getHeaderLine('Content-Length');
+          $this->values['size'] = (int) $response->getHeaderLine('Content-Length')[0];
         }
         else {
           // The server didn't sent the Content-Length header. In this case,

@@ -3,7 +3,9 @@
 namespace Drupal\file_link\Plugin\Validation\Constraint;
 
 use Drupal\Core\Site\Settings;
+use Drupal\Core\Url;
 use Drupal\file_link\Plugin\Field\FieldType\FileLinkItem;
+use GuzzleHttp\Exception\ConnectException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -52,10 +54,11 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
     }
 
     $is_valid = TRUE;
+    $uri = $link->get('uri')->getValue();
 
     // Try to resolve the given URI to a URL. It may fail if it's schemeless.
     try {
-      $url = $link->getUrl()->toString();
+      $url = Url::fromUri($uri, ['absolute' => TRUE])->toString();
     }
     catch (\InvalidArgumentException $e) {
       $this->context->addViolation("The following error occurred while getting the link URL: @error", ['@error' => $e->getMessage()]);
@@ -65,17 +68,23 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
     if ($is_valid) {
       // If URL has no path but it still needs an extension then it's not valid.
       if (!$this->hasPath($url) && $this->needsExtension($link)) {
-        $this->context->addViolation("Provided file URL has no path nor extension: @uri", ['@uri' => $link->get('uri')->getValue()]);
+        $this->context->addViolation("Provided file URL has no path nor extension: @uri", ['@uri' => $uri]);
         $is_valid = FALSE;
       }
 
       if ($is_valid) {
         // Check for redirect response and get effective URL if any.
-        $url = $this->getEffectiveUrl($url);
+        try {
+          $url = $this->getEffectiveUrl($url);
+        }
+        catch (ConnectException $e) {
+          $this->context->addViolation("The following error occurred while getting the link URL: @error", ['@error' => $e->getMessage()]);
+          $is_valid = FALSE;
+        }
 
         $name = \Drupal::service('file_system')->basename($this->getPath($url));
         if (empty($name) || ($this->needsExtension($link) && !$this->hasExtension($url))) {
-          $this->context->addViolation("Provided file URL has no extension: @uri", ['@uri' => $link->get('uri')->getValue()]);
+          $this->context->addViolation("Provided file URL has no extension: @uri", ['@uri' => $uri]);
           $is_valid = FALSE;
         }
         if ($is_valid && $this->hasExtension($url)) {
@@ -86,7 +95,7 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
 
     // If not valid construct error message.
     if (!$is_valid) {
-      $this->context->addViolation("Provided file URL has no valid extension: @uri", ['@uri' => $link->get('uri')->getValue()]);
+      $this->context->addViolation("Provided file URL has no valid extension: @uri", ['@uri' => $uri]);
     }
   }
 
@@ -180,6 +189,7 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
     $options = [
       'exceptions' => FALSE,
       'allow_redirects' => [
+        'strict' => TRUE,
         'on_redirect' => function (Request $request, Response $response, Uri $uri) use (&$url) {
           $url = (string) $uri;
         },

@@ -29,7 +29,7 @@ class FileLinkWidget extends LinkWidget {
     $element['uri']['#type'] = 'url';
     $element['uri']['#description'] = [
       [
-        '#markup' => $this->t("You can enter an internal path such as /sites/default/files/image.png or an external URL such as http://example.com/doc.pdf."),
+        '#markup' => $this->t("Enter the full file URL, such as <code>http://example.com/doc.pdf</code>."),
       ],
     ];
     $extensions = implode(', ', explode(' ', $this->getFieldSetting('file_extensions')));
