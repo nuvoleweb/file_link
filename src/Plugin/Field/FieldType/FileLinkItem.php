@@ -197,7 +197,7 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
           $this->values['format'] = NULL;
         }
         if ($response->hasHeader('Content-Length')) {
-          $this->values['size'] = (int) $response->getHeaderLine('Content-Length')[0];
+          $this->values['size'] = (int) $response->getHeaderLine('Content-Length');
         }
         else {
           // The server didn't sent the Content-Length header. In this case,
