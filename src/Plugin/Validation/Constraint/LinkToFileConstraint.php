@@ -82,13 +82,13 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
           $is_valid = FALSE;
         }
 
-        $name = \Drupal::service('file_system')->basename($this->getPath($url));
-        if (empty($name) || ($this->needsExtension($link) && !$this->hasExtension($url))) {
+        if ($this->needsExtension($link) && !$this->hasExtension($url)) {
           $this->context->addViolation("Provided file URL has no extension: @uri", ['@uri' => $uri]);
           $is_valid = FALSE;
         }
+
         if ($is_valid && $this->hasExtension($url)) {
-          $is_valid = $this->hasValidExtension($name, $link);
+          $is_valid = $this->hasValidExtension($url, $link);
         }
       }
     }

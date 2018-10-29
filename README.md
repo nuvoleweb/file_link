@@ -32,8 +32,8 @@ $ docker-compose up -d
 Then:
 
 ```
-$ docker-compose exec web composer install
-$ docker-compose exec web ./vendor/bin/run drupal:site-install
+$ docker-compose exec php composer install
+$ docker-compose exec php ./vendor/bin/run drupal:site-install
 ```
 
 Your test site will be available at [http://localhost:8080/build](http://localhost:8080/build).
@@ -41,13 +41,13 @@ Your test site will be available at [http://localhost:8080/build](http://localho
 Run coding style checks:
 
 ```
-$ docker-compose exec web ./vendor/bin/grumphp run
+$ docker-compose exec php ./vendor/bin/grumphp ru<n
 ```
 
 Run tests:
 
 ```
-$ docker-compose exec web ./vendor/bin/phpunit
+$ docker-compose exec php ./vendor/bin/phpunit
 ```
 
 You can disable HTTP redirect following on field validation by setting the following in you `settings.php`:
