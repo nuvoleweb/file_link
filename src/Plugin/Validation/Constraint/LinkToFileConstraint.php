@@ -181,7 +181,9 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
    *   Effective URL.
    */
   protected function getEffectiveUrl($url) {
-    if (!Settings::get('file_link.follow_redirect_on_validate', TRUE)) {
+
+    // Skip performing HTTP requests, useful when running bulk imports.
+    if (Settings::get('file_link.disable_http_requests', FALSE) || !Settings::get('file_link.follow_redirect_on_validate', TRUE)) {
       return $url;
     }
 
