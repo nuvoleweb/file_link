@@ -56,7 +56,13 @@ You can disable HTTP redirect following on field validation by setting the follo
 $settings['file_link.follow_redirect_on_validate'] = FALSE;
 ```
 
-This could be useful to speed up bulk import content operations.
+To completely disable performing HTTP requests when validating or saving a field, set the following:
+
+```
+$settings['file_link.disable_http_requests'] = TRUE;
+```
+
+Setting above is recommended when running bulk content import operations.
 
 # Author
 

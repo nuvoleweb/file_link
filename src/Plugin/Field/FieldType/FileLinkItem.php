@@ -5,6 +5,7 @@ namespace Drupal\file_link\Plugin\Field\FieldType;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\Url;
 use Drupal\file\Plugin\Field\FieldType\FileItem;
@@ -147,6 +148,12 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
    */
   public function preSave() {
     parent::preSave();
+
+    // Skip performing HTTP requests, useful when running bulk imports.
+    if (Settings::get('file_link.disable_http_requests', FALSE)) {
+      return;
+    }
+
     $entity = $this->getEntity();
     $storage = $this->getEntityTypeManager()->getStorage($entity->getEntityTypeId());
     /** @var \Drupal\Core\Entity\ContentEntityInterface $original */
