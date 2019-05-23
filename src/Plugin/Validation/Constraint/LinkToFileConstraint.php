@@ -5,7 +5,7 @@ namespace Drupal\file_link\Plugin\Validation\Constraint;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\file_link\Plugin\Field\FieldType\FileLinkItem;
-use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -74,13 +74,7 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
 
       if ($is_valid) {
         // Check for redirect response and get effective URL if any.
-        try {
-          $url = $this->getEffectiveUrl($url);
-        }
-        catch (ConnectException $e) {
-          $this->context->addViolation("The following error occurred while getting the link URL: @error", ['@error' => $e->getMessage()]);
-          $is_valid = FALSE;
-        }
+        $url = $this->getEffectiveUrl($url);
 
         if ($this->needsExtension($link) && !$this->hasExtension($url)) {
           $this->context->addViolation("Provided file URL has no extension: @uri", ['@uri' => $uri]);
@@ -203,8 +197,8 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
       // Perform HEAD request to get actual URL, as in: after the redirect.
       \Drupal::httpClient()->head($url, $options);
     }
-    catch (ConnectException $e) {
-      // Don't fail validation if connection has timed out.
+    catch (RequestException $e) {
+      // Don't fail validation if connection has timed out or URL was not found.
     }
 
     return $url;
