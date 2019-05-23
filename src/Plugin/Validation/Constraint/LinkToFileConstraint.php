@@ -189,7 +189,8 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
 
     // Setup HTTP client to follow redirect and perform an HEAD request.
     $options = [
-      'exceptions' => FALSE,
+      'exceptions' => TRUE,
+      'connect_timeout' => TRUE,
       'allow_redirects' => [
         'strict' => TRUE,
         'on_redirect' => function (Request $request, Response $response, Uri $uri) use (&$url) {
@@ -197,7 +198,14 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
         },
       ],
     ];
-    \Drupal::httpClient()->head($url, $options);
+
+    try {
+      // Perform HEAD request to get actual URL, as in: after the redirect.
+      \Drupal::httpClient()->head($url, $options);
+    }
+    catch (ConnectException $e) {
+      // Don't fail validation if connection has timed out.
+    }
 
     return $url;
   }
