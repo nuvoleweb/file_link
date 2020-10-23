@@ -159,9 +159,19 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $original */
     $original = $entity->isNew() ? NULL : $storage->loadUnchanged($entity->id());
     $field_name = $this->getFieldDefinition()->getName();
-    $original_uri = $original ? $original->{$field_name}->uri : NULL;
-    $size = $original ? $original->{$field_name}->size : NULL;
-    $format = $original ? $original->{$field_name}->format : NULL;
+
+    $original_uri = NULL;
+    $size = NULL;
+    $format = NULL;
+    if ($original !== NULL) {
+      $item = $original->get($field_name)->get($this->getName());
+      if ($item != NULL) {
+        $values = $item->getValue();
+        $original_uri = $values['uri'];
+        $size = $values['size'];
+        $format = $values['format'];
+      }
+    }
 
     // We parse the metadata in any of the next cases:
     // - The host entity is new.
