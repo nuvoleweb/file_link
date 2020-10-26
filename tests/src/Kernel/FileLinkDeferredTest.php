@@ -43,7 +43,7 @@ class FileLinkDeferredTest extends KernelTestBase {
   /**
    * Tests file_link field metadata storage with extension.
    */
-  public function testMultiValue() {
+  public function testDeferredCheck() {
     $settings = Settings::getAll();
     // Set up the fixtures.
     $settings['file_link_test_middleware'] = [
@@ -116,6 +116,41 @@ class FileLinkDeferredTest extends KernelTestBase {
     static::assertEquals(27, $entity->get('deferred_url')->get(1)->getSize());
     static::assertEquals('text/plain', $entity->get('deferred_url')->get(2)->getFormat());
     static::assertEquals(27, $entity->get('deferred_url')->get(2)->getSize());
+  }
+
+  /**
+   * Tests file_link field metadata storage with extension.
+   */
+  public function testDeletedEntity() {
+    $settings = Settings::getAll();
+    // Set up the fixtures.
+    $settings['file_link_test_middleware'] = [
+      'http://file_link.drupal/latentcy-test-file.txt' => [
+        'status' => 200,
+        'headers' => ['Content-Type' => 'text/plain', 'Content-Length' => 27],
+      ],
+    ];
+    new Settings($settings);
+
+    /** @var \Drupal\entity_test\Entity\EntityTest $entity */
+    $entity = EntityTest::create(['name' => 'Foo', 'type' => 'article']);
+
+    $entity->get('deferred_url')->set(0, ['uri' => 'http://file_link.drupal/latentcy-test-file.txt']);
+
+    $entity->save();
+
+    static::assertEquals(1, file_link_test_entity_save_counter($entity));
+
+    static::assertEquals(NULL, $entity->get('deferred_url')->get(0)->getFormat());
+    static::assertEquals(0, $entity->get('deferred_url')->get(0)->getSize());
+
+    static::assertEquals(0, HttpMiddleware::getRequestCount('http://file_link.drupal/latentcy-test-file.txt'));
+
+    $entity->delete();
+
+    $this->container->get('cron')->run();
+
+    static::assertEquals(0, HttpMiddleware::getRequestCount('http://file_link.drupal/latentcy-test-file.txt'));
   }
 
 }
