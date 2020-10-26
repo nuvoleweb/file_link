@@ -14,6 +14,14 @@ class HttpMiddleware {
 
   public static $recorder = [];
 
+  public static function getRequestCount($key) {
+    if (!isset(static::$recorder[$key])) {
+      static::$recorder[$key] = 0;
+    }
+
+    return static::$recorder[$key];
+  }
+
   /**
    * Invoked method that returns a promise.
    */
