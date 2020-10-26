@@ -77,6 +77,10 @@ class FileLinkMetadataUpdate extends QueueWorkerBase implements ContainerFactory
       else {
         $entity = $storage->load($data->getId());
       }
+      if ($entity === NULL) {
+        // The entity must have been removed.
+        return;
+      }
       if ($entity->hasTranslation($data->getLang())) {
         $entity = $entity->getTranslation($data->getLang());
       }
