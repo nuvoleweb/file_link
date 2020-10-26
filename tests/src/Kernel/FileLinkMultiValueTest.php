@@ -78,15 +78,16 @@ class FileLinkMultiValueTest extends KernelTestBase {
     static::assertEquals('text/plain', $entity->get('multivalue_url')->get(2)->getFormat());
     static::assertEquals(27, $entity->get('multivalue_url')->get(2)->getSize());
 
-    static::assertEquals(2, HttpMiddleware::$recorder['http://file_link.drupal/fancy-file-1.txt']);
-    static::assertEquals(1, HttpMiddleware::$recorder['http://file_link.drupal/fancy-file-2.txt']);
-    static::assertEquals(false, isset(HttpMiddleware::$recorder['http://file_link.drupal/fancy-file-3.txt']));
+    static::assertEquals(2, HttpMiddleware::getRequestCount('http://file_link.drupal/fancy-file-1.txt'));
+    static::assertEquals(1, HttpMiddleware::getRequestCount('http://file_link.drupal/fancy-file-2.txt'));
+    static::assertEquals(0, HttpMiddleware::getRequestCount('http://file_link.drupal/fancy-file-3.txt'));
 
     // Save the entity without touching anything.
     $entity->save();
 
-    static::assertEquals(2, HttpMiddleware::$recorder['http://file_link.drupal/fancy-file-1.txt']);
-    static::assertEquals(1, HttpMiddleware::$recorder['http://file_link.drupal/fancy-file-2.txt']);
+    static::assertEquals(2, HttpMiddleware::getRequestCount('http://file_link.drupal/fancy-file-1.txt'));
+    static::assertEquals(1, HttpMiddleware::getRequestCount('http://file_link.drupal/fancy-file-2.txt'));
+    static::assertEquals(0, HttpMiddleware::getRequestCount('http://file_link.drupal/fancy-file-3.txt'));
 
     // Update one of the items and add a new one.
     $entity->get('multivalue_url')->set(1, ['uri' => 'http://file_link.drupal/fancy-file-3.txt']);
@@ -104,9 +105,9 @@ class FileLinkMultiValueTest extends KernelTestBase {
     static::assertEquals(80, $entity->get('multivalue_url')->get(3)->getSize());
 
     // Check how often the urls are called.
-    static::assertEquals(2, HttpMiddleware::$recorder['http://file_link.drupal/fancy-file-1.txt']);
-    static::assertEquals(1, HttpMiddleware::$recorder['http://file_link.drupal/fancy-file-2.txt']);
-    static::assertEquals(2, HttpMiddleware::$recorder['http://file_link.drupal/fancy-file-3.txt']);
+    static::assertEquals(2, HttpMiddleware::getRequestCount('http://file_link.drupal/fancy-file-1.txt'));
+    static::assertEquals(1, HttpMiddleware::getRequestCount('http://file_link.drupal/fancy-file-2.txt'));
+    static::assertEquals(2, HttpMiddleware::getRequestCount('http://file_link.drupal/fancy-file-3.txt'));
   }
 
 }

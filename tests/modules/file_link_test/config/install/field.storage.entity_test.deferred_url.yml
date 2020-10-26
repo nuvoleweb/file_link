@@ -4,8 +4,8 @@ dependencies:
   module:
     - file_link
     - entity_test
-id: entity_test.multivalue_url
-field_name: multivalue_url
+id: entity_test.deferred_url
+field_name: deferred_url
 entity_type: entity_test
 type: file_link
 settings: {  }

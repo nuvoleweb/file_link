@@ -28,19 +28,24 @@ class FileLinkMetadataUpdate extends QueueWorkerBase implements ContainerFactory
   protected static $processing = 0;
 
   /**
-   * Static cache of processed entities.
-   *
-   * @var array
-   */
-  protected static $processed;
-
-  /**
    * The entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
+  /**
+   * FileLinkMetadataUpdate constructor.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entityTypeManager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entityTypeManager;
@@ -66,12 +71,19 @@ class FileLinkMetadataUpdate extends QueueWorkerBase implements ContainerFactory
       $storage = $this->entityTypeManager->getStorage($data->getType());
 
       /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-      $entity = $storage->loadRevision($data->getId());
+      if ($data->getRevisionId() !== NULL) {
+        $entity = $storage->loadRevision($data->getRevisionId());
+      }
+      else {
+        $entity = $storage->load($data->getId());
+      }
       if ($entity->hasTranslation($data->getLang())) {
         $entity = $entity->getTranslation($data->getLang());
       }
       // Do not create a revision but re-save the revision.
-      $entity->setNewRevision(FALSE);
+      if ($entity->getEntityType()->isRevisionable()) {
+        $entity->setNewRevision(FALSE);
+      }
 
       if ($entity instanceof EntityChangedInterface) {
         if ($entity->getChangedTime() > $data->getTime()) {
@@ -82,17 +94,12 @@ class FileLinkMetadataUpdate extends QueueWorkerBase implements ContainerFactory
         $entity->setChangedTime($entity->getChangedTime());
       }
 
-      if (is_array(static::$processed[$data->getTime()]) && in_array($data->getKey(), static::$processed[$data->getTime()])) {
-        // We already re-saved the entity at for this time.
-        return;
-      }
-
-      static::$processed[$data->getTime()][] = $data->getKey();
       // Set the static property to be processing.
       static::$processing++;
       try {
         $entity->save();
-      } catch (\Exception $exception) {
+      }
+      catch (\Exception $exception) {
         // Decrease the counter and re-throw the exception.
         static::$processing--;
         throw $exception;
@@ -105,6 +112,7 @@ class FileLinkMetadataUpdate extends QueueWorkerBase implements ContainerFactory
    * Indication of whether the queue is processing.
    *
    * @return bool
+   *   True if the queue worker is processing.
    */
   public static function isProcessing(): bool {
     return static::$processing > 0;

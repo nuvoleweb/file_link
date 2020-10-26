@@ -2,6 +2,7 @@
 
 namespace Drupal\file_link\Plugin\Field\FieldType;
 
+use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -80,7 +81,14 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
    *
    * @var bool
    */
-  protected $needs_parsing = FALSE;
+  protected $needsParsing = FALSE;
+
+  /**
+   * Keep the already queued entities in a static cache.
+   *
+   * @var array
+   */
+  protected static $queued = [];
 
   /**
    * {@inheritdoc}
@@ -202,8 +210,8 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
     // - The 'file_link' URI has changed.
     // - Stored metadata is empty, possible due to an previous failure. We try
     //   again to parse, hoping the connection was fixed in the meantime.
-    $this->needs_parsing = $entity->isNew() || ($this->uri !== $original_uri) || empty($size) || empty($format);
-    if ($this->needs_parsing) {
+    $this->needsParsing = $entity->isNew() || ($this->uri !== $original_uri) || empty($size) || empty($format);
+    if ($this->needsParsing) {
       if ($this->needsQueue()) {
         // We set the needs_parsing property and check it in ::postSave.
         // Now just reset the values, cron will set them later.
@@ -266,17 +274,17 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
    * {@inheritdoc}
    */
   public function postSave($update) {
-    if ($this->needs_parsing && $this->needsQueue()) {
+    if ($this->needsParsing && $this->needsQueue()) {
       // We need to queue the entity update in postSave because we need to
       // know the entity id so that we can load it in cron and re-save it.
       $entity = $this->getEntity();
-      $item = new FileLinkQueueItem($entity->getEntityTypeId(), $entity->getRevisionId(), $entity->language()->getId());
-      static $queued = [];
-      if (!in_array($item->getKey(), $queued)) {
+      $rev = ($entity instanceof RevisionableInterface) ? $entity->getRevisionId() : NULL;
+      $item = new FileLinkQueueItem($entity->getEntityTypeId(), $entity->id(), $entity->language()->getId(), $rev);
+      if (!in_array($item->getKey(), static::$queued)) {
         $this->getQueue()->createItem($item);
         // Save the queued entity in a static cache so that we don't queue it
         // more than once when using a multi-value field.
-        $queued[] = $item->getKey();
+        static::$queued[] = $item->getKey();
       }
     }
 

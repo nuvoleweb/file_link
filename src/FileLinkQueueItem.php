@@ -10,29 +10,59 @@ use Drupal\Core\Language\Language;
 final class FileLinkQueueItem {
 
   /**
+   * The request time of when the entity was queued.
+   *
    * @var int
    */
   private $time;
 
   /**
+   * The entity type.
+   *
    * @var string
    */
   private $type;
 
   /**
+   * The entity id, this only works on content entities.
+   *
    * @var int
    */
   private $id;
 
   /**
+   * The revision id for revisionable entity types.
+   *
+   * @var int|null
+   */
+  private $revisionId;
+
+  /**
+   * The language code for translatable entities.
+   *
    * @var string
    */
   private $lang;
 
-  public function __construct(string $type, int $id, string $lang = Language::LANGCODE_NOT_SPECIFIED, int $time = NULL) {
+  /**
+   * FileLinkQueueItem constructor.
+   *
+   * @param string $type
+   *   The entity type.
+   * @param int $id
+   *   The entity id.
+   * @param string $lang
+   *   The language code.
+   * @param int|null $revisionId
+   *   The revision id.
+   * @param int|null $time
+   *   The timestamp.
+   */
+  public function __construct(string $type, int $id, string $lang = Language::LANGCODE_NOT_SPECIFIED, int $revisionId = NULL, int $time = NULL) {
     $this->type = $type;
     $this->id = $id;
     $this->lang = $lang;
+    $this->revisionId = $revisionId;
     if ($time === NULL) {
       $time = \Drupal::time()->getRequestTime();
     }
@@ -70,6 +100,16 @@ final class FileLinkQueueItem {
   }
 
   /**
+   * Get the revision Id.
+   *
+   * @return int|null
+   *   The revision id.
+   */
+  public function getRevisionId() {
+    return $this->revisionId;
+  }
+
+  /**
    * Get the entity language.
    *
    * @return string
@@ -86,7 +126,7 @@ final class FileLinkQueueItem {
    *   The key which identifies the queued entity variation.
    */
   public function getKey(): string {
-    return $this->getType() . $this->getId() . $this->getLang();
+    return $this->getType() . $this->getId() . $this->getLang() . $this->getRevisionId() ?? '';
   }
 
 }
