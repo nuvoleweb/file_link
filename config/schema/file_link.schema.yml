@@ -33,3 +33,6 @@ field.formatter.settings.file_link:
 field.formatter.settings.file_link_separate:
   type: field.formatter.settings.file_link
   label: 'Separate file link format settings'
+
+field.widget.settings.file_link_default:
+  type: field.widget.settings.link_default
