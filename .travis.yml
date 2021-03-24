@@ -15,12 +15,12 @@ env:
   - DOCKER_COMPOSE_VERSION=1.17.1
   matrix:
   - DRUPAL_VERSION=~8.8
-  - DRUPAL_VERSION=~8.9
-  - DRUPAL_VERSION=8.9.x-dev
+  - DRUPAL_VERSION=~9.1
+  - DRUPAL_VERSION=9.2.x-dev
 
 matrix:
   allow_failures:
-  - env: DRUPAL_VERSION=8.8.x-dev
+  - env: DRUPAL_VERSION=9.2.x-dev
 
 before_install:
 - cp docker-compose.yml.dist docker-compose.yml
