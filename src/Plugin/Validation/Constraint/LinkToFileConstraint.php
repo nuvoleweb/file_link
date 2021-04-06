@@ -215,7 +215,7 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
 
     try {
       // Perform HEAD request to get actual URL, as in: after the redirect.
-      \Drupal::httpClient()->head($url, $options);
+      \Drupal::httpClient()->request(Settings::get('file_link.http_request_method', 'HEAD'), $url, $options);
     }
     catch (RequestException $e) {
       // Don't fail validation if connection has timed out or URL was not found.

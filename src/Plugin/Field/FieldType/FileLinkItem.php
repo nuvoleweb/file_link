@@ -235,7 +235,7 @@ class FileLinkItem extends LinkItem implements FileLinkInterface {
 
       try {
         // Perform only a HEAD method to save bandwidth.
-        $this->setResponse($this->getHttpClient()->head($url, $options));
+        $this->setResponse($this->getHttpClient()->request(Settings::get('file_link.http_request_method', 'HEAD'), $url, $options));
       }
       catch (RequestException $request_exception) {
         $this->setException($request_exception);

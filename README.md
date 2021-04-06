@@ -64,6 +64,11 @@ $settings['file_link.disable_http_requests'] = TRUE;
 
 Setting above is recommended when running bulk content import operations.
 
+By default all HTTP requests are done with HEAD method, you could change that with the next settings key:
+```
+$settings['file_link.http_request_method'] = 'GET'
+```
+
 # Author
 
 - Claudiu Cristea - https://www.drupal.org/u/claudiu.cristea
