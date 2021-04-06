@@ -162,6 +162,10 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
   /**
    * Check whereas basename has a valid extension.
    *
+   * Validation copied from file_validate_extensions() with the only difference
+   * that file basename should be parsed for basename, to avoid issue with the
+   * query parameters passed.
+   *
    * @param string $basename
    *   URL path basename.
    * @param \Drupal\file_link\Plugin\Field\FieldType\FileLinkItem $link
@@ -169,12 +173,14 @@ class LinkToFileConstraint extends Constraint implements ConstraintValidatorInte
    *
    * @return bool
    *   Whereas basename has a valid extension.
+   *
+   * @see file_validate_extensions()
    */
   protected function hasValidExtension($basename, FileLinkItem $link) {
     $extensions = trim($link->getFieldDefinition()->getSetting('file_extensions'));
     if (!empty($extensions)) {
       $regex = '/\.(' . preg_replace('/ +/', '|', preg_quote($extensions)) . ')$/i';
-      return (bool) preg_match($regex, $basename) !== FALSE;
+      return (bool) preg_match($regex, parse_url($basename, PHP_URL_PATH)) !== FALSE;
     }
     return TRUE;
   }

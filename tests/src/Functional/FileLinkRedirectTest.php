@@ -29,6 +29,11 @@ class FileLinkRedirectTest extends BrowserTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests redirects.
    *
    * @param string $path

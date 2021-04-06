@@ -13,7 +13,7 @@ use Drupal\KernelTests\KernelTestBase;
 /**
  * Provides kernel tests for 'file_link' field type.
  *
- * @group file_link_new
+ * @group file_link
  */
 class FileLinkDeferredTest extends KernelTestBase {
 
