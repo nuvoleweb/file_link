@@ -12,14 +12,44 @@ use Psr\Http\Message\RequestInterface;
  */
 class HttpMiddleware {
 
+  /**
+   * List of counters of requested resources.
+   *
+   * @var array
+   */
   public static $recorder = [];
 
-  public static function getRequestCount($key) {
-    if (!isset(static::$recorder[$key])) {
-      static::$recorder[$key] = 0;
+  /**
+   * The last request.
+   *
+   * @var RequestInterface|null
+   */
+  public static $lastRequest;
+
+  /**
+   * Gets number of requests made to particular url.
+   *
+   * @param string $url
+   *   The searched URL.
+   *
+   * @return int
+   *   Number of requests made to that url.
+   */
+  public static function getRequestCount(string $url) {
+    if (!isset(static::$recorder[$url])) {
+      static::$recorder[$url] = 0;
     }
 
-    return static::$recorder[$key];
+    return static::$recorder[$url];
+  }
+
+  /**
+   * Gets the last made request.
+   *
+   * @return \Psr\Http\Message\RequestInterface|null
+   */
+  public static function getLastRequest() {
+    return static::$lastRequest;
   }
 
   /**
@@ -28,6 +58,7 @@ class HttpMiddleware {
   public function __invoke() {
     return function ($handler) {
       return function (RequestInterface $request, array $options) use ($handler) {
+        static::$lastRequest = $request;
         $uri = $request->getUri();
         $settings = Settings::get('file_link_test_middleware', []);
         // Check if the request is made to one of our fixtures.

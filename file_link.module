@@ -7,6 +7,7 @@
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Site\Settings;
 
 /**
  * Implements hook_help().
@@ -66,4 +67,23 @@ function file_link_theme() {
  */
 function template_preprocess_file_link_formatter_link_separate(array &$variables) {
   $variables['link'] = Link::fromTextAndUrl($variables['url_title'], $variables['url']);
+}
+
+/**
+ * Gets HTTP method to request external documents with.
+ *
+ * @return string
+ *   Http method HEAD or GET.
+ */
+function _file_link_request_method() {
+  $allowed = ['HEAD', 'GET'];
+  $method = strtoupper(Settings::get('file_link.http_request_method', 'HEAD'));
+  if (!in_array($method, $allowed, TRUE)) {
+    \Drupal::logger('file_link')
+      ->warning('Wrong parameter given for "file_link.http_request_method" settings key, @value passed, but HEAD or GET expected.', [
+        '@value' => $method,
+      ]);
+    return 'HEAD';
+  }
+  return $method;
 }
